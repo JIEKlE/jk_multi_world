@@ -1,0 +1,7 @@
+jiekie\util\WorldData.class
+jiekie\completer\MultiWorldTabCompleter.class
+jiekie\command\MultiWorldCommand.class
+jiekie\util\ChatUtil.class
+jiekie\MultiWorldPlugin.class
+jiekie\util\WorldManager.class
+jiekie\util\SoundUtil.class
