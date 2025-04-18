@@ -1,11 +1,16 @@
 package jiekie.util;
 
 public class WorldData {
+    /* 필수 정보 */
     private String worldName;
     private String environment;
     private String type;
     private boolean generateStructures;
+    
+    /* 선택 정보 */
     private Long seed;
+    
+    /* 게임 규칙 */
     private boolean spawnAnimal;
     private boolean spawnMonster;
     private boolean pvp;

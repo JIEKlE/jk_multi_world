@@ -1,6 +1,7 @@
 package jiekie.util;
 
 import jiekie.MultiWorldPlugin;
+import jiekie.exception.*;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -12,22 +13,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class WorldManager {
     private final MultiWorldPlugin plugin;
-    private final List<WorldData> worldDataList = new ArrayList<>();
-    private final String[] DEFAULT_WORLD_NAMES = {"world", "world_nether", "world_the_end"};
+    private final Map<String, WorldData> worldDataMap = new HashMap<>();
+    private final Set<String> DEFAULT_WORLD_NAMES = Set.of("world", "world_nether", "world_the_end");
 
     public WorldManager(MultiWorldPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void load() {
-        worldDataList.clear();
+        worldDataMap.clear();
         FileConfiguration config = plugin.getConfig();
 
         ConfigurationSection worldSection = config.getConfigurationSection("world");
@@ -35,133 +35,123 @@ public class WorldManager {
 
         for(String worldName : worldSection.getKeys(false)) {
             String path = "world." + worldName;
+            try {
+                WorldData worldData = createWorldData(
+                        worldName
+                        , config.getString(path + ".environment")
+                        , config.getString(path + ".type")
+                        , config.getBoolean(path + ".generateStructures")
+                        , config.contains(path + ".seed") ? config.getLong(path + ".seed") : null
+                );
 
-            // 기본 정보 설정
-            String environment = config.getString(path + ".environment");
-            String type = config.getString(path + ".type");
-            boolean generateStructures = config.getBoolean(path + ".generateStructures");
-            Long seed = config.contains(path + ".seed") ? config.getLong(path + ".seed") : null;
+                worldData.setSpawnAnimal(config.getBoolean(path + ".spawnAnimal"));
+                worldData.setSpawnMonster(config.getBoolean(path + ".spawnMonster"));
+                worldData.setPvp(config.getBoolean(path + ".pvp"));
 
-            WorldData worldData = new WorldData(worldName, environment, type, generateStructures, seed);
+                worldDataMap.put(worldName, worldData);
+                createWorldByWorldData(worldData);
 
-            // 규칙 설정
-            worldData.setSpawnAnimal(config.getBoolean(path + ".spawnAnimal"));
-            worldData.setSpawnMonster(config.getBoolean(path + ".spawnMonster"));
-            worldData.setPvp(config.getBoolean(path + ".pvp"));
-
-            worldDataList.add(worldData);
-            createWorldByWorldName(worldData);
+            } catch (WorldCreationException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void createWorld(Player player, String worldName, String environmentName, String typeName, boolean generateStructures, Long seed) {
-        if(isDefaultWorldName(worldName)) {
-            ChatUtil.isDefaultWorldName(player);
-            return;
-        }
-
-        if(worldExists(worldName)) {
-            ChatUtil.worldExists(player);
-            return;
-        }
-
-        WorldData worldData = new WorldData(worldName, environmentName, typeName, generateStructures, seed);
-        worldDataList.add(worldData);
-
-        if(!createWorldByWorldName(worldData)) {
-            ChatUtil.couldNotCreateWorld(player);
-            return;
-        }
-
-        ChatUtil.createWorld(player);
-        SoundUtil.playNoteBlockBell(player);
+    public void createWorld(String worldName, String environmentName, String typeName, boolean generateStructures, Long seed) throws WorldCreationException {
+        WorldData worldData = createWorldData(worldName, environmentName, typeName, generateStructures, seed);
+        createWorldByWorldData(worldData);
     }
 
-    public void removeWorld(Player player, String worldName) {
-        if(isDefaultWorldName(worldName)) {
-            ChatUtil.isDefaultWorldName(player);
-            return;
-        }
+    public void deleteWorld(String worldName) throws WorldDeletionException {
+        if(isDefaultWorldName(worldName))
+            throw new WorldDeletionException(ChatUtil.DEFAULT_WORLD_NAME);
 
-        if(!worldExists(worldName)) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+        if(!isCreatedWorld(worldName))
+            throw new WorldDeletionException(ChatUtil.WORLD_NOT_CREATED);
 
         World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+        if(world == null)
+            throw new WorldDeletionException(ChatUtil.WORLD_NOT_FOUND);
+
+        if(playersExistInWorld(world))
+            throw new WorldDeletionException(ChatUtil.PLAYERS_EXIST);
 
         Bukkit.unloadWorld(worldName, false);
         WorldData worldData = getWorldDataByWorldName(worldName);
-        worldDataList.remove(worldData);
+        worldDataMap.remove(worldName);
 
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         try {
             deleteDirectory(worldFolder);
-            ChatUtil.removeWorld(player);
-            SoundUtil.playNoteBlockBell(player);
-
         } catch (IOException e) {
-            ChatUtil.failToDeleteFolder(player);
-            e.printStackTrace();
+            throw new WorldDeletionException(ChatUtil.FAIL_TO_DELETE_WORLD_FOLDER);
         }
     }
 
-    public void setWorldRule(Player player, String worldName, String rule, boolean value) {
-        if(isDefaultWorldName(worldName)) {
-            ChatUtil.isDefaultWorldName(player);
-            return;
-        }
-
-        if(!worldExists(worldName)) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+    public void setWorldRule(String worldName, String rule, boolean value) throws WorldRuleChangeException {
+        if(isCreatedWorldIncludeDefault(worldName))
+            throw new WorldRuleChangeException(ChatUtil.WORLD_NOT_CREATED);
 
         World world = Bukkit.getWorld(worldName);
         if(world == null) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
+            throw new WorldRuleChangeException(ChatUtil.WORLD_NOT_FOUND);
         }
 
         WorldData worldData = getWorldDataByWorldName(worldName);
-        if(rule.equals("동물스폰")) {
-            setAnimalAndMonsterSpawn(world, worldData, value, worldData.isSpawnMonster());
 
-        } else if(rule.equals("몬스터스폰")) {
-            setAnimalAndMonsterSpawn(world, worldData, worldData.isSpawnAnimal(), value);
-
-        } else if(rule.equals("PVP")) {
+        if(rule.equals("동물스폰"))
+            setAnimalSpawn(world, worldData, value);
+        else if(rule.equals("몬스터스폰"))
+            setMonsterSpawn(world, worldData, value);
+        else if(rule.equals("PVP"))
             setPvp(world, worldData, value);
+       else
+            throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
 
-        } else {
-            ChatUtil.ruleDoesNotExist(player);
-            return;
-        }
-
-        ChatUtil.setWorldRule(player);
-        SoundUtil.playNoteBlockBell(player);
+       world.save();
     }
 
-    public void backupWorld(Player player, String worldName) {
-        if(isDefaultWorldName(worldName)) {
-            ChatUtil.isDefaultWorldName(player);
-            return;
-        }
+    public void resetWorld(String worldName) throws WorldResetException {
+        if(isDefaultWorldName(worldName))
+            throw new WorldResetException(ChatUtil.DEFAULT_WORLD_NAME);
 
-        if(!worldExists(worldName)) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+        if(!isCreatedWorld(worldName))
+            throw new WorldResetException(ChatUtil.WORLD_NOT_CREATED);
 
         World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
+        if(world == null)
+            throw new WorldResetException(ChatUtil.WORLD_NOT_FOUND);
+
+        if(playersExistInWorld(world))
+            throw new WorldResetException(ChatUtil.PLAYERS_EXIST);
+
+        Bukkit.unloadWorld(worldName, false);
+        WorldData worldData = getWorldDataByWorldName(worldName);
+
+        File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+        try {
+            deleteDirectory(worldFolder);
+        } catch (IOException e) {
+            throw new WorldResetException(ChatUtil.FAIL_TO_DELETE_WORLD_FOLDER);
         }
+
+        try {
+            createWorldByWorldData(worldData);
+        } catch (WorldCreationException e) {
+            throw new WorldResetException(ChatUtil.FAIL_TO_CREATE_WORLD);
+        }
+    }
+
+    public Map<String, String> backupWorld(String worldName) throws WorldBackupException {
+        if(!isCreatedWorldIncludeDefault(worldName))
+            throw new WorldBackupException(ChatUtil.WORLD_NOT_FOUND);
+
+        World world = Bukkit.getWorld(worldName);
+        if(world == null)
+            throw new WorldBackupException(ChatUtil.WORLD_NOT_FOUND);
+
+        if(playersExistInWorld(world))
+            throw new WorldBackupException(ChatUtil.PLAYERS_EXIST);
 
         Bukkit.unloadWorld(worldName, true);
 
@@ -173,133 +163,97 @@ public class WorldManager {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
         String formattedTime = now.format(formatter);
 
+        Map<String, String> fileInfo = new java.util.HashMap<>();
+
         File zipFile = new File(backupFolder, worldName + "_" + formattedTime + ".zip");
         try(FileOutputStream fos = new FileOutputStream(zipFile);
             ZipOutputStream zos = new ZipOutputStream(fos)) {
             zipFolder(worldFolder, worldName, zos);
 
             WorldData worldData = getWorldDataByWorldName(worldName);
-            createWorldByWorldName(worldData);
+            createWorldByWorldData(worldData);
 
-            ChatUtil.backupWorld(player, zipFile.getParent(), zipFile.getName());
-            SoundUtil.playNoteBlockBell(player);
+            fileInfo.put("path", zipFile.getParent());
+            fileInfo.put("name", zipFile.getName());
 
         } catch (IOException e) {
-            e.printStackTrace();
-            ChatUtil.failToBackupFolder(player);
+            throw new WorldBackupException(ChatUtil.FAIL_TO_BACKUP_WORLD_FOLDER);
+
+        } catch (WorldCreationException e) {
+            throw new WorldBackupException(ChatUtil.FAIL_TO_CREATE_WORLD);
         }
+
+        return fileInfo;
     }
 
-    public void moveToWorld(Player player, String worldName) {
-        if(!worldExistsIncludeDefaultWorld(worldName)) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+    public void moveToWorld(String playerName, String worldName) throws TeleportToWorldException {
+        if(!isCreatedWorldIncludeDefault(worldName))
+            throw new TeleportToWorldException(ChatUtil.WORLD_NOT_CREATED);
 
         World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+        if(world == null)
+            throw new TeleportToWorldException(ChatUtil.WORLD_NOT_FOUND);
+
+        Player player = Bukkit.getPlayerExact(playerName);
+        if(player == null)
+            throw new TeleportToWorldException(ChatUtil.PLAYER_NOT_FOUND);
 
         player.teleport(world.getSpawnLocation());
         SoundUtil.playTeleport(player);
     }
 
-    public void movePlayerToWorld(Player player, String worldName, String targetPlayerName) {
-        if(!worldExistsIncludeDefaultWorld(worldName)) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+    private WorldData createWorldData(String worldName, String environmentName, String typeName, boolean generateStructures, Long seed) throws WorldCreationException {
+        if(isDefaultWorldName(worldName))
+            throw new WorldCreationException(ChatUtil.DEFAULT_WORLD_NAME);
 
-        World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            ChatUtil.worldDoesNotExist(player);
-            return;
-        }
+        if(isCreatedWorld(worldName))
+            throw new WorldCreationException(ChatUtil.WORLD_NAME_ALREADY_EXISTS);
 
-        Player targetPlayer = Bukkit.getPlayerExact(targetPlayerName);
-        if(targetPlayer == null) {
-            ChatUtil.playerDoesNotExist(player);
-            return;
-        }
+        if(!worldName.matches("[a-zA-Z0-9_\\-]+"))
+            throw new WorldCreationException(ChatUtil.INVALID_WORLD_NAME);
 
-        targetPlayer.teleport(world.getSpawnLocation());
-        SoundUtil.playTeleport(targetPlayer);
-
-        ChatUtil.movePlayerToWorld(player);
-        SoundUtil.playNoteBlockBell(player);
+        WorldData worldData = new WorldData(worldName, environmentName, typeName, generateStructures, seed);
+        return worldData;
     }
 
-    private boolean createWorldByWorldName(WorldData worldData) {
+    private World createWorldByWorldData(WorldData worldData) throws WorldCreationException {
         WorldCreator worldCreator = new WorldCreator(worldData.getWorldName());
 
         World.Environment environment = getEnvironment(worldData.getEnvironment());
-        if(environment == null) {
-            return false;
-        }
+        if(environment == null)
+            throw new WorldCreationException(ChatUtil.INVALID_ENVIRONMENT);
 
         WorldType type = getType(worldData.getType());
-        if(type == null) {
-            return false;
-        }
+        if(type == null)
+            throw new WorldCreationException(ChatUtil.INVALID_TYPE);
 
+        // 월드 생성
         worldCreator.environment(environment);
         worldCreator.type(type);
         worldCreator.generateStructures(worldData.isGenerateStructures());
         if(worldData.getSeed() != null)
             worldCreator.seed(worldData.getSeed());
-
         World world = worldCreator.createWorld();
 
-        setAnimalAndMonsterSpawn(world, worldData, worldData.isSpawnAnimal(), worldData.isSpawnMonster());
+        // 규칙 설정
+        setAnimalSpawn(world, worldData, worldData.isSpawnAnimal());
+        setMonsterSpawn(world, worldData, worldData.isSpawnMonster());
         setPvp(world, worldData, worldData.isPvp());
 
-        return true;
-    }
-
-    private void setAnimalAndMonsterSpawn(World world, WorldData worldData, boolean spawnAnimal, boolean spawnMonster) {
-        world.setSpawnFlags(spawnAnimal, spawnMonster);
-        worldData.setSpawnAnimal(spawnAnimal);
-        worldData.setSpawnMonster(spawnMonster);
-
-        if(spawnAnimal || spawnMonster)
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
-        else
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-    }
-
-    private void setPvp(World world, WorldData worldData, boolean value) {
-        world.setPVP(value);
-        worldData.setPvp(value);
+        return world;
     }
 
     private boolean isDefaultWorldName(String worldName) {
-        for(String defaultWorldName : DEFAULT_WORLD_NAMES) {
-            if(defaultWorldName.equals(worldName)) return true;
-        }
-
-        return false;
+        return DEFAULT_WORLD_NAMES.contains(worldName);
     }
 
-    private boolean worldExists(String worldName) {
-        for(WorldData worldData : worldDataList) {
-            if(worldData.getWorldName().equals(worldName)) return true;
-        }
-
-        return false;
+    private boolean isCreatedWorld(String worldName) {
+        return worldDataMap.containsKey(worldName);
     }
 
-    private boolean worldExistsIncludeDefaultWorld(String worldName) {
-        for(WorldData worldData : worldDataList) {
-            if(worldData.getWorldName().equals(worldName)) return true;
-        }
-
-        for(String defaultWorldName : DEFAULT_WORLD_NAMES) {
-            if(defaultWorldName.equals(worldName)) return true;
-        }
-
-        return false;
+    private boolean isCreatedWorldIncludeDefault(String worldName) {
+        if(worldDataMap.containsKey(worldName)) return true;
+        return DEFAULT_WORLD_NAMES.contains(worldName);
     }
 
     private World.Environment getEnvironment(String environment) {
@@ -322,19 +276,54 @@ public class WorldManager {
         return null;
     }
 
-    private WorldData getWorldDataByWorldName(String worldName) {
-        for(WorldData worldData : worldDataList)
-            if(worldData.getWorldName().equals(worldName)) return worldData;
+    private boolean playersExistInWorld(World world) {
+        for(Player player : Bukkit.getOnlinePlayers()) {
+            if(player.getWorld().equals(world)) return true;
+        }
 
-        return null;
+        return false;
+    }
+
+    private void setAnimalSpawn(World world, WorldData worldData, boolean value) {
+        boolean allowMonsters = world.getAllowMonsters();
+        world.setSpawnFlags(value, allowMonsters);
+
+        if(worldData != null)
+            worldData.setSpawnAnimal(value);
+
+        if(value || allowMonsters)
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
+        else
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+    }
+
+    private void setMonsterSpawn(World world, WorldData worldData, boolean value) {
+        boolean allowAnimals = world.getAllowAnimals();
+        world.setSpawnFlags(allowAnimals, value);
+
+        if(worldData != null)
+            worldData.setSpawnMonster(value);
+
+        if(value || allowAnimals)
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
+        else
+            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+    }
+
+    private void setPvp(World world, WorldData worldData, boolean value) {
+        world.setPVP(value);
+
+        if(worldData != null)
+            worldData.setPvp(value);
+    }
+
+    private WorldData getWorldDataByWorldName(String worldName) {
+        return worldDataMap.get(worldName);
     }
 
     public List<String> getWorldNames() {
-        List<String> worldNameList = new ArrayList<>();
-        for(WorldData worldData : worldDataList)
-            worldNameList.add(worldData.getWorldName());
-
-        return worldNameList;
+        if(worldDataMap.isEmpty()) return Collections.emptyList();
+        return new ArrayList<>(worldDataMap.keySet());
     }
 
     private void deleteDirectory(File directory) throws IOException {
@@ -379,7 +368,7 @@ public class WorldManager {
         FileConfiguration config = plugin.getConfig();
         config.set("world", null);
 
-        for(WorldData worldData : worldDataList) {
+        for(WorldData worldData : worldDataMap.values()) {
             String worldName = worldData.getWorldName();
             String path = "world." + worldName;
 

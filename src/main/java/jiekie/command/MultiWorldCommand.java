@@ -1,11 +1,15 @@
 package jiekie.command;
 
 import jiekie.MultiWorldPlugin;
+import jiekie.exception.*;
 import jiekie.util.ChatUtil;
+import jiekie.util.SoundUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.Map;
 
 public class MultiWorldCommand implements CommandExecutor {
     private final MultiWorldPlugin plugin;
@@ -45,6 +49,10 @@ public class MultiWorldCommand implements CommandExecutor {
                 setWorldRule(player, args);
                 break;
 
+            case "초기화":
+                resetWorld(player, args);
+                break;
+
             case "백업":
                 backupWorld(player, args);
                 break;
@@ -71,12 +79,6 @@ public class MultiWorldCommand implements CommandExecutor {
             return;
         }
 
-        String worldName = args[1];
-        if(!worldName.matches("[a-zA-Z0-9_\\-]+")) {
-            ChatUtil.wrongWorldName(player);
-            return;
-        }
-
         boolean generateStructures = Boolean.parseBoolean(args[4]);
         Long seed = null;
         if(args.length > 5) {
@@ -84,12 +86,19 @@ public class MultiWorldCommand implements CommandExecutor {
                 seed = Long.parseLong(args[5]);
 
             } catch(NumberFormatException e) {
-                ChatUtil.seedNotNumber(player);
+                ChatUtil.showErrorMessage(player, ChatUtil.INVALID_SEED);
                 return;
             }
         }
 
-        plugin.getWorldManager().createWorld(player, worldName, args[2], args[3], generateStructures, seed);
+        try {
+            plugin.getWorldManager().createWorld(args[1], args[2], args[3], generateStructures, seed);
+            ChatUtil.createWorld(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (WorldCreationException e) {
+
+        }
     }
 
     private void removeWorld(Player player, String[] args) {
@@ -98,7 +107,14 @@ public class MultiWorldCommand implements CommandExecutor {
             return;
         }
 
-        plugin.getWorldManager().removeWorld(player, args[1]);
+        try {
+            plugin.getWorldManager().deleteWorld(args[1]);
+            ChatUtil.removeWorld(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (WorldDeletionException e) {
+            ChatUtil.showErrorMessage(player, e.getMessage());
+        }
     }
 
     private void setWorldRule(Player player, String[] args) {
@@ -108,7 +124,30 @@ public class MultiWorldCommand implements CommandExecutor {
         }
 
         boolean value = Boolean.parseBoolean(args[3]);
-        plugin.getWorldManager().setWorldRule(player, args[1], args[2], value);
+        try {
+            plugin.getWorldManager().setWorldRule(args[1], args[2], value);
+            ChatUtil.setWorldRule(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (WorldRuleChangeException e) {
+            ChatUtil.showErrorMessage(player, e.getMessage());
+        }
+    }
+
+    private void resetWorld(Player player, String[] args) {
+        if(args.length < 4) {
+            player.sendMessage(ChatUtil.wrongCommand() + " (/월드 초기화 월드명)");
+            return;
+        }
+
+        try {
+            plugin.getWorldManager().resetWorld(args[1]);
+            ChatUtil.resetWorld(player);
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (WorldResetException e) {
+            ChatUtil.showErrorMessage(player, e.getMessage());
+        }
     }
 
     private void backupWorld(Player player, String[] args) {
@@ -117,7 +156,14 @@ public class MultiWorldCommand implements CommandExecutor {
             return;
         }
 
-        plugin.getWorldManager().backupWorld(player, args[1]);
+        try {
+            Map<String, String> fileInfo = plugin.getWorldManager().backupWorld(args[1]);
+            ChatUtil.backupWorld(player, fileInfo.get("path"), fileInfo.get("name"));
+            SoundUtil.playNoteBlockBell(player);
+
+        } catch (WorldBackupException e) {
+            ChatUtil.showErrorMessage(player, e.getMessage());
+        }
     }
 
     private void moveToWorld(Player player, String[] args) {
@@ -126,9 +172,22 @@ public class MultiWorldCommand implements CommandExecutor {
             return;
         }
 
-        if(args.length == 2)
-            plugin.getWorldManager().moveToWorld(player, args[1]);
-        else
-            plugin.getWorldManager().movePlayerToWorld(player, args[1], args[2]);
+        if(args.length == 2) {
+            try {
+                plugin.getWorldManager().moveToWorld(player.getName(), args[1]);
+            } catch (TeleportToWorldException e) {
+                ChatUtil.showErrorMessage(player, e.getMessage());
+            }
+        } else {
+            try {
+                plugin.getWorldManager().moveToWorld(args[2], args[1]);
+                ChatUtil.movePlayerToWorld(player);
+                SoundUtil.playNoteBlockBell(player);
+
+            } catch (TeleportToWorldException e) {
+                ChatUtil.showErrorMessage(player, e.getMessage());
+            }
+        }
+
     }
 }

@@ -22,7 +22,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         int length = args.length;
         if(length == 1)
-            return Arrays.asList("생성", "제거", "설정", "백업", "이동", "도움말");
+            return Arrays.asList("생성", "제거", "설정", "초기화", "백업", "이동", "도움말");
 
         // 생성 제외
         String commandType = args[0];
@@ -37,7 +37,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
             return Arrays.asList("NORMAL", "FLAT");
 
         if(length == 5 && commandType.equals("생성"))
-            return Arrays.asList("구조물여부", "true", "false");
+            return Arrays.asList("true", "false");
 
         if(length == 6 && commandType.equals("생성"))
             return Arrays.asList("시드");
