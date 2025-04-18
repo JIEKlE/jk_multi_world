@@ -5,7 +5,7 @@ import jiekie.exception.*;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,6 +47,13 @@ public class WorldManager {
                 worldData.setSpawnAnimal(config.getBoolean(path + ".spawnAnimal"));
                 worldData.setSpawnMonster(config.getBoolean(path + ".spawnMonster"));
                 worldData.setPvp(config.getBoolean(path + ".pvp"));
+                worldData.setDayLightCycle(config.getBoolean(path + ".dayLightCycle"));
+                worldData.setWeatherCycle(config.getBoolean(path + ".weatherCycle"));
+                worldData.setSpawnVillagers(config.getBoolean(path + ".spawnVillagers"));
+                worldData.setSpawnPhantom(config.getBoolean(path + ".spawnPhantom"));
+                worldData.setKeepInventory(config.getBoolean(path + ".keepInventory"));
+                worldData.setFireTick(config.getBoolean(path + ".fireTick"));
+                worldData.setMobGriefing(config.getBoolean(path + ".mobGriefing"));
 
                 worldDataMap.put(worldName, worldData);
                 createWorldByWorldData(worldData);
@@ -76,6 +83,7 @@ public class WorldManager {
         if(playersExistInWorld(world))
             throw new WorldDeletionException(ChatUtil.PLAYERS_EXIST);
 
+        Bukkit.broadcastMessage(ChatUtil.BROADCAST_DELETE_WORLD);
         Bukkit.unloadWorld(worldName, false);
         WorldData worldData = getWorldDataByWorldName(worldName);
         worldDataMap.remove(worldName);
@@ -105,7 +113,21 @@ public class WorldManager {
             setMonsterSpawn(world, worldData, value);
         else if(rule.equals("PVP"))
             setPvp(world, worldData, value);
-       else
+        else if(rule.equals("시간흐름"))
+            setDayLightCycle(world, worldData, value);
+        else if(rule.equals("날씨변화"))
+            setWeatherCycle(world, worldData, value);
+        else if(rule.equals("주민스폰"))
+            setSpawnVillagers(world, worldData, value);
+        else if(rule.equals("팬텀스폰"))
+            setSpawnPhantom(world, worldData, value);
+        else if(rule.equals("인벤세이브"))
+            setKeepInventory(world, worldData, value);
+        else if(rule.equals("불번짐"))
+            setFireTick(world, worldData, value);
+        else if(rule.equals("크리퍼폭발"))
+            setMobGriefing(world, worldData, value);
+        else
             throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
 
        world.save();
@@ -125,6 +147,7 @@ public class WorldManager {
         if(playersExistInWorld(world))
             throw new WorldResetException(ChatUtil.PLAYERS_EXIST);
 
+        Bukkit.broadcastMessage(ChatUtil.BROADCAST_RESET_WORLD);
         Bukkit.unloadWorld(worldName, false);
         WorldData worldData = getWorldDataByWorldName(worldName);
 
@@ -153,6 +176,7 @@ public class WorldManager {
         if(playersExistInWorld(world))
             throw new WorldBackupException(ChatUtil.PLAYERS_EXIST);
 
+        Bukkit.broadcastMessage(ChatUtil.BROADCAST_BACKUP_WORLD);
         Bukkit.unloadWorld(worldName, true);
 
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
@@ -239,6 +263,12 @@ public class WorldManager {
         setAnimalSpawn(world, worldData, worldData.isSpawnAnimal());
         setMonsterSpawn(world, worldData, worldData.isSpawnMonster());
         setPvp(world, worldData, worldData.isPvp());
+        setDayLightCycle(world, worldData, worldData.isDayLightCycle());
+        setWeatherCycle(world, worldData, worldData.isWeatherCycle());
+        setSpawnVillagers(world, worldData, worldData.isSpawnVillagers());
+        setSpawnPhantom(world, worldData, worldData.isSpawnPhantom());
+        setFireTick(world, worldData, worldData.isFireTick());
+        setMobGriefing(world, worldData, worldData.isMobGriefing());
 
         return world;
     }
@@ -295,6 +325,13 @@ public class WorldManager {
             world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
         else
             world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+
+        if(value) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof Animals)
+                    entity.remove();
+            }
+        }
     }
 
     private void setMonsterSpawn(World world, WorldData worldData, boolean value) {
@@ -308,6 +345,23 @@ public class WorldManager {
             world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
         else
             world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
+
+        if(value) {
+            for(Entity entity : world.getEntities()) {
+                if(entity instanceof Monster
+                        || entity instanceof Slime
+                        || entity instanceof Shulker
+                        || entity instanceof MagmaCube
+                        || entity instanceof EnderDragon
+                        || entity instanceof Wither)
+                    entity.remove();
+            }
+
+            world.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
+
+        } else {
+            world.setGameRule(GameRule.DO_PATROL_SPAWNING, true);
+        }
     }
 
     private void setPvp(World world, WorldData worldData, boolean value) {
@@ -315,6 +369,64 @@ public class WorldManager {
 
         if(worldData != null)
             worldData.setPvp(value);
+    }
+
+    private void setDayLightCycle(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, value);
+
+        if(worldData != null)
+            worldData.setDayLightCycle(value);
+    }
+
+    private void setWeatherCycle(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_WEATHER_CYCLE, value);
+
+        if(worldData != null)
+            worldData.setWeatherCycle(value);
+    }
+
+    private void setSpawnVillagers(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_TRADER_SPAWNING, value);
+
+        if(worldData != null)
+            worldData.setSpawnVillagers(value);
+
+        if(!value) {
+            for (Entity entity : world.getEntities()) {
+                if (entity instanceof Villager
+                    || entity instanceof WanderingTrader
+                    || entity instanceof TraderLlama)
+                    entity.remove();
+            }
+        }
+    }
+
+    private void setSpawnPhantom(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_INSOMNIA, value);
+
+        if(worldData != null)
+            worldData.setSpawnPhantom(value);
+    }
+
+    private void setKeepInventory(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.KEEP_INVENTORY, value);
+
+        if(worldData != null)
+            worldData.setKeepInventory(value);
+    }
+
+    private void setFireTick(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_FIRE_TICK, value);
+
+        if(worldData != null)
+            worldData.setFireTick(value);
+    }
+
+    private void setMobGriefing(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_PATROL_SPAWNING, value);
+
+        if(worldData != null)
+            worldData.setMobGriefing(value);
     }
 
     private WorldData getWorldDataByWorldName(String worldName) {
@@ -376,9 +488,17 @@ public class WorldManager {
             config.set(path + ".type", worldData.getType());
             config.set(path + ".generateStructures", worldData.isGenerateStructures());
             config.set(path + ".seed", worldData.getSeed());
+
             config.set(path + ".spawnAnimal", worldData.isSpawnAnimal());
             config.set(path + ".spawnMonster", worldData.isSpawnMonster());
             config.set(path + ".pvp", worldData.isPvp());
+            config.set(path + ".dayLightCycle", worldData.isDayLightCycle());
+            config.set(path + ".weatherCycle", worldData.isWeatherCycle());
+            config.set(path + ".spawnVillagers", worldData.isSpawnVillagers());
+            config.set(path + ".spawnPhantom", worldData.isSpawnPhantom());
+            config.set(path + ".keepInventory", worldData.isKeepInventory());
+            config.set(path + ".fireTick", worldData.isFireTick());
+            config.set(path + ".mobGriefing", worldData.isMobGriefing());
 
             World world = Bukkit.getWorld(worldName);
             world.save();

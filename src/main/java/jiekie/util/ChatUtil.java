@@ -22,6 +22,10 @@ public class ChatUtil {
     public static String FAIL_TO_DELETE_WORLD_FOLDER = "월드를 폴더를 제거하는데 실패했습니다.";
     public static String FAIL_TO_BACKUP_WORLD_FOLDER = "월드를 폴더를 백업하는데 실패했습니다.";
 
+    public static String BROADCAST_DELETE_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 제거 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
+    public static String BROADCAST_RESET_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 초기화 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
+    public static String BROADCAST_BACKUP_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 백업 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
+
     public static String getWarnPrefix() {
         return "[ " + ChatColor.YELLOW + "❗" + ChatColor.WHITE + " ] ";
     }

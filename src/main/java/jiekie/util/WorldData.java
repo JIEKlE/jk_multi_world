@@ -14,6 +14,13 @@ public class WorldData {
     private boolean spawnAnimal;
     private boolean spawnMonster;
     private boolean pvp;
+    private boolean dayLightCycle;
+    private boolean weatherCycle;
+    private boolean spawnVillagers;
+    private boolean spawnPhantom;
+    private boolean keepInventory;
+    private boolean fireTick;
+    private boolean mobGriefing;
 
     public WorldData(String worldName, String environment, String type, boolean generateStructures, Long seed) {
         this.worldName = worldName;
@@ -25,6 +32,13 @@ public class WorldData {
         this.spawnAnimal = true;
         this.spawnMonster = true;
         this.pvp = true;
+        this.dayLightCycle = true;
+        this.weatherCycle = true;
+        this.spawnVillagers = true;
+        this.spawnPhantom = true;
+        this.keepInventory = false;
+        this.fireTick = true;
+        this.mobGriefing = true;
     }
 
     public String getWorldName() {
@@ -69,5 +83,61 @@ public class WorldData {
 
     public void setPvp(boolean pvp) {
         this.pvp = pvp;
+    }
+
+    public boolean isDayLightCycle() {
+        return dayLightCycle;
+    }
+
+    public void setDayLightCycle(boolean dayLightCycle) {
+        this.dayLightCycle = dayLightCycle;
+    }
+
+    public boolean isWeatherCycle() {
+        return weatherCycle;
+    }
+
+    public void setWeatherCycle(boolean weatherCycle) {
+        this.weatherCycle = weatherCycle;
+    }
+
+    public boolean isSpawnVillagers() {
+        return spawnVillagers;
+    }
+
+    public void setSpawnVillagers(boolean spawnVillagers) {
+        this.spawnVillagers = spawnVillagers;
+    }
+
+    public boolean isSpawnPhantom() {
+        return spawnPhantom;
+    }
+
+    public void setSpawnPhantom(boolean spawnPhantom) {
+        this.spawnPhantom = spawnPhantom;
+    }
+
+    public boolean isKeepInventory() {
+        return keepInventory;
+    }
+
+    public void setKeepInventory(boolean keepInventory) {
+        this.keepInventory = keepInventory;
+    }
+
+    public boolean isFireTick() {
+        return fireTick;
+    }
+
+    public void setFireTick(boolean fireTick) {
+        this.fireTick = fireTick;
+    }
+
+    public boolean isMobGriefing() {
+        return mobGriefing;
+    }
+
+    public void setMobGriefing(boolean mobGriefing) {
+        this.mobGriefing = mobGriefing;
     }
 }
