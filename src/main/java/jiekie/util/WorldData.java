@@ -11,12 +11,9 @@ public class WorldData {
     private Long seed;
     
     /* 게임 규칙 */
-    private boolean spawnAnimal;
-    private boolean spawnMonster;
     private boolean pvp;
     private boolean dayLightCycle;
     private boolean weatherCycle;
-    private boolean spawnVillagers;
     private boolean spawnPhantom;
     private boolean keepInventory;
     private boolean fireTick;
@@ -29,12 +26,9 @@ public class WorldData {
         this.generateStructures = generateStructures;
         this.seed = seed;
 
-        this.spawnAnimal = true;
-        this.spawnMonster = true;
         this.pvp = true;
         this.dayLightCycle = true;
         this.weatherCycle = true;
-        this.spawnVillagers = true;
         this.spawnPhantom = true;
         this.keepInventory = false;
         this.fireTick = true;
@@ -61,22 +55,6 @@ public class WorldData {
         return seed;
     }
 
-    public boolean isSpawnAnimal() {
-        return spawnAnimal;
-    }
-
-    public void setSpawnAnimal(boolean spawnAnimal) {
-        this.spawnAnimal = spawnAnimal;
-    }
-
-    public boolean isSpawnMonster() {
-        return spawnMonster;
-    }
-
-    public void setSpawnMonster(boolean spawnMonster) {
-        this.spawnMonster = spawnMonster;
-    }
-
     public boolean isPvp() {
         return pvp;
     }
@@ -99,14 +77,6 @@ public class WorldData {
 
     public void setWeatherCycle(boolean weatherCycle) {
         this.weatherCycle = weatherCycle;
-    }
-
-    public boolean isSpawnVillagers() {
-        return spawnVillagers;
-    }
-
-    public void setSpawnVillagers(boolean spawnVillagers) {
-        this.spawnVillagers = spawnVillagers;
     }
 
     public boolean isSpawnPhantom() {

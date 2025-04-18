@@ -1,7 +1,13 @@
 jiekie\util\WorldData.class
-jiekie\completer\MultiWorldTabCompleter.class
-jiekie\command\MultiWorldCommand.class
+jiekie\exception\WorldResetException.class
 jiekie\util\ChatUtil.class
-jiekie\MultiWorldPlugin.class
-jiekie\util\WorldManager.class
+jiekie\exception\TeleportToWorldException.class
+jiekie\exception\WorldCreationException.class
+jiekie\exception\WorldRuleChangeException.class
 jiekie\util\SoundUtil.class
+jiekie\completer\MultiWorldTabCompleter.class
+jiekie\exception\WorldBackupException.class
+jiekie\command\MultiWorldCommand.class
+jiekie\MultiWorldPlugin.class
+jiekie\exception\WorldDeletionException.class
+jiekie\util\WorldManager.class

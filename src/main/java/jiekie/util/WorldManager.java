@@ -44,12 +44,9 @@ public class WorldManager {
                         , config.contains(path + ".seed") ? config.getLong(path + ".seed") : null
                 );
 
-                worldData.setSpawnAnimal(config.getBoolean(path + ".spawnAnimal"));
-                worldData.setSpawnMonster(config.getBoolean(path + ".spawnMonster"));
                 worldData.setPvp(config.getBoolean(path + ".pvp"));
                 worldData.setDayLightCycle(config.getBoolean(path + ".dayLightCycle"));
                 worldData.setWeatherCycle(config.getBoolean(path + ".weatherCycle"));
-                worldData.setSpawnVillagers(config.getBoolean(path + ".spawnVillagers"));
                 worldData.setSpawnPhantom(config.getBoolean(path + ".spawnPhantom"));
                 worldData.setKeepInventory(config.getBoolean(path + ".keepInventory"));
                 worldData.setFireTick(config.getBoolean(path + ".fireTick"));
@@ -67,6 +64,7 @@ public class WorldManager {
     public void createWorld(String worldName, String environmentName, String typeName, boolean generateStructures, Long seed) throws WorldCreationException {
         WorldData worldData = createWorldData(worldName, environmentName, typeName, generateStructures, seed);
         createWorldByWorldData(worldData);
+        worldDataMap.put(worldName, worldData);
     }
 
     public void deleteWorld(String worldName) throws WorldDeletionException {
@@ -85,7 +83,6 @@ public class WorldManager {
 
         Bukkit.broadcastMessage(ChatUtil.BROADCAST_DELETE_WORLD);
         Bukkit.unloadWorld(worldName, false);
-        WorldData worldData = getWorldDataByWorldName(worldName);
         worldDataMap.remove(worldName);
 
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
@@ -93,11 +90,14 @@ public class WorldManager {
             deleteDirectory(worldFolder);
         } catch (IOException e) {
             throw new WorldDeletionException(ChatUtil.FAIL_TO_DELETE_WORLD_FOLDER);
+
+        } finally {
+            Bukkit.broadcastMessage(ChatUtil.BROADCAST_DELETE_WORLD_COMPLETION);
         }
     }
 
     public void setWorldRule(String worldName, String rule, boolean value) throws WorldRuleChangeException {
-        if(isCreatedWorldIncludeDefault(worldName))
+        if(!isCreatedWorldIncludeDefault(worldName))
             throw new WorldRuleChangeException(ChatUtil.WORLD_NOT_CREATED);
 
         World world = Bukkit.getWorld(worldName);
@@ -107,18 +107,12 @@ public class WorldManager {
 
         WorldData worldData = getWorldDataByWorldName(worldName);
 
-        if(rule.equals("동물스폰"))
-            setAnimalSpawn(world, worldData, value);
-        else if(rule.equals("몬스터스폰"))
-            setMonsterSpawn(world, worldData, value);
-        else if(rule.equals("PVP"))
+        if(rule.equals("PVP"))
             setPvp(world, worldData, value);
         else if(rule.equals("시간흐름"))
             setDayLightCycle(world, worldData, value);
         else if(rule.equals("날씨변화"))
             setWeatherCycle(world, worldData, value);
-        else if(rule.equals("주민스폰"))
-            setSpawnVillagers(world, worldData, value);
         else if(rule.equals("팬텀스폰"))
             setSpawnPhantom(world, worldData, value);
         else if(rule.equals("인벤세이브"))
@@ -129,8 +123,6 @@ public class WorldManager {
             setMobGriefing(world, worldData, value);
         else
             throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
-
-       world.save();
     }
 
     public void resetWorld(String worldName) throws WorldResetException {
@@ -154,14 +146,13 @@ public class WorldManager {
         File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
         try {
             deleteDirectory(worldFolder);
-        } catch (IOException e) {
-            throw new WorldResetException(ChatUtil.FAIL_TO_DELETE_WORLD_FOLDER);
-        }
-
-        try {
             createWorldByWorldData(worldData);
         } catch (WorldCreationException e) {
             throw new WorldResetException(ChatUtil.FAIL_TO_CREATE_WORLD);
+        } catch (IOException e) {
+            throw new WorldResetException(ChatUtil.FAIL_TO_DELETE_WORLD_FOLDER);
+        } finally {
+            Bukkit.broadcastMessage(ChatUtil.BROADCAST_RESET_WORLD_COMPLETION);
         }
     }
 
@@ -205,6 +196,9 @@ public class WorldManager {
 
         } catch (WorldCreationException e) {
             throw new WorldBackupException(ChatUtil.FAIL_TO_CREATE_WORLD);
+
+        } finally {
+            Bukkit.broadcastMessage(ChatUtil.BROADCAST_BACKUP_WORLD_COMPLETION);
         }
 
         return fileInfo;
@@ -260,13 +254,11 @@ public class WorldManager {
         World world = worldCreator.createWorld();
 
         // 규칙 설정
-        setAnimalSpawn(world, worldData, worldData.isSpawnAnimal());
-        setMonsterSpawn(world, worldData, worldData.isSpawnMonster());
         setPvp(world, worldData, worldData.isPvp());
         setDayLightCycle(world, worldData, worldData.isDayLightCycle());
         setWeatherCycle(world, worldData, worldData.isWeatherCycle());
-        setSpawnVillagers(world, worldData, worldData.isSpawnVillagers());
         setSpawnPhantom(world, worldData, worldData.isSpawnPhantom());
+        setKeepInventory(world, worldData, worldData.isKeepInventory());
         setFireTick(world, worldData, worldData.isFireTick());
         setMobGriefing(world, worldData, worldData.isMobGriefing());
 
@@ -314,56 +306,6 @@ public class WorldManager {
         return false;
     }
 
-    private void setAnimalSpawn(World world, WorldData worldData, boolean value) {
-        boolean allowMonsters = world.getAllowMonsters();
-        world.setSpawnFlags(value, allowMonsters);
-
-        if(worldData != null)
-            worldData.setSpawnAnimal(value);
-
-        if(value || allowMonsters)
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
-        else
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-
-        if(value) {
-            for (Entity entity : world.getEntities()) {
-                if (entity instanceof Animals)
-                    entity.remove();
-            }
-        }
-    }
-
-    private void setMonsterSpawn(World world, WorldData worldData, boolean value) {
-        boolean allowAnimals = world.getAllowAnimals();
-        world.setSpawnFlags(allowAnimals, value);
-
-        if(worldData != null)
-            worldData.setSpawnMonster(value);
-
-        if(value || allowAnimals)
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, true);
-        else
-            world.setGameRule(GameRule.DO_MOB_SPAWNING, false);
-
-        if(value) {
-            for(Entity entity : world.getEntities()) {
-                if(entity instanceof Monster
-                        || entity instanceof Slime
-                        || entity instanceof Shulker
-                        || entity instanceof MagmaCube
-                        || entity instanceof EnderDragon
-                        || entity instanceof Wither)
-                    entity.remove();
-            }
-
-            world.setGameRule(GameRule.DO_PATROL_SPAWNING, false);
-
-        } else {
-            world.setGameRule(GameRule.DO_PATROL_SPAWNING, true);
-        }
-    }
-
     private void setPvp(World world, WorldData worldData, boolean value) {
         world.setPVP(value);
 
@@ -383,22 +325,6 @@ public class WorldManager {
 
         if(worldData != null)
             worldData.setWeatherCycle(value);
-    }
-
-    private void setSpawnVillagers(World world, WorldData worldData, boolean value) {
-        world.setGameRule(GameRule.DO_TRADER_SPAWNING, value);
-
-        if(worldData != null)
-            worldData.setSpawnVillagers(value);
-
-        if(!value) {
-            for (Entity entity : world.getEntities()) {
-                if (entity instanceof Villager
-                    || entity instanceof WanderingTrader
-                    || entity instanceof TraderLlama)
-                    entity.remove();
-            }
-        }
     }
 
     private void setSpawnPhantom(World world, WorldData worldData, boolean value) {
@@ -427,6 +353,35 @@ public class WorldManager {
 
         if(worldData != null)
             worldData.setMobGriefing(value);
+    }
+
+    private void killAllAnimals(World world) {
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof Animals)
+                entity.remove();
+        }
+    }
+
+    private void killAllMonsters(World world) {
+        for(Entity entity : world.getEntities()) {
+            if(entity instanceof Monster
+                    || entity instanceof Slime
+                    || entity instanceof Shulker
+                    || entity instanceof MagmaCube
+                    || entity instanceof EnderDragon
+                    || entity instanceof Wither
+                    || entity instanceof Wither)
+                entity.remove();
+        }
+    }
+
+    private void killAllVillagers(World world) {
+        for (Entity entity : world.getEntities()) {
+            if (entity instanceof Villager
+                    || entity instanceof WanderingTrader
+                    || entity instanceof TraderLlama)
+                entity.remove();
+        }
     }
 
     private WorldData getWorldDataByWorldName(String worldName) {
@@ -489,12 +444,9 @@ public class WorldManager {
             config.set(path + ".generateStructures", worldData.isGenerateStructures());
             config.set(path + ".seed", worldData.getSeed());
 
-            config.set(path + ".spawnAnimal", worldData.isSpawnAnimal());
-            config.set(path + ".spawnMonster", worldData.isSpawnMonster());
             config.set(path + ".pvp", worldData.isPvp());
             config.set(path + ".dayLightCycle", worldData.isDayLightCycle());
             config.set(path + ".weatherCycle", worldData.isWeatherCycle());
-            config.set(path + ".spawnVillagers", worldData.isSpawnVillagers());
             config.set(path + ".spawnPhantom", worldData.isSpawnPhantom());
             config.set(path + ".keepInventory", worldData.isKeepInventory());
             config.set(path + ".fireTick", worldData.isFireTick());

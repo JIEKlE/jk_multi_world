@@ -25,6 +25,9 @@ public class ChatUtil {
     public static String BROADCAST_DELETE_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 제거 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
     public static String BROADCAST_RESET_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 초기화 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
     public static String BROADCAST_BACKUP_WORLD = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 백업 중입니다. 모든 플레이어는 이동을 멈춰주세요.";
+    public static String BROADCAST_DELETE_WORLD_COMPLETION = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 제거가 완료되었습니다.";
+    public static String BROADCAST_RESET_WORLD_COMPLETION = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 초기화가 완료되었습니다.";
+    public static String BROADCAST_BACKUP_WORLD_COMPLETION = "[ " + ChatColor.RED + ChatColor.BOLD + "공 지" + ChatColor.RESET + " ] 월드를 백업이 완료되었습니다.";
 
     public static String getWarnPrefix() {
         return "[ " + ChatColor.YELLOW + "❗" + ChatColor.WHITE + " ] ";

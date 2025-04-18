@@ -44,8 +44,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
 
         // 항목
         if(length == 3 && commandType.equals("설정"))
-            return Arrays.asList("동물스폰", "몬스터스폰", "PVP", "시간흐름", "날씨변화"
-                                , "주민스폰", "팬텀스폰", "인벤세이브", "불번짐", "크리퍼폭발");
+            return Arrays.asList("PVP", "시간흐름", "날씨변화", "팬텀스폰", "인벤세이브", "불번짐", "크리퍼폭발");
 
         if(length == 4 && commandType.equals("설정"))
             return Arrays.asList("true", "false");

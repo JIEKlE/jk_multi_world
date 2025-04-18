@@ -97,7 +97,7 @@ public class MultiWorldCommand implements CommandExecutor {
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldCreationException e) {
-
+            ChatUtil.showErrorMessage(player, e.getMessage());
         }
     }
 
@@ -135,7 +135,7 @@ public class MultiWorldCommand implements CommandExecutor {
     }
 
     private void resetWorld(Player player, String[] args) {
-        if(args.length < 4) {
+        if(args.length < 2) {
             player.sendMessage(ChatUtil.wrongCommand() + " (/월드 초기화 월드명)");
             return;
         }
