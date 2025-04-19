@@ -4,6 +4,7 @@ main: jiekie.MultiWorldPlugin
 api-version: '1.20'
 authors: [Jiekie]
 description: 월드 관리 플러그인
+depend: [jk_nickname]
 commands:
   월드:
     description: 월드 설정 명령어

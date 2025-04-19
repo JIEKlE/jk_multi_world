@@ -1,6 +1,7 @@
 package jiekie.completer;
 
 import jiekie.MultiWorldPlugin;
+import jiekie.api.NicknameAPI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -51,7 +52,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
 
         // 이동
         if(length == 3 && commandType.equals("이동"))
-            return Bukkit.getOnlinePlayers().stream().map(Player::getName).toList();
+            return NicknameAPI.getInstance().getPlayerNameAndNicknameList();
 
         return Collections.emptyList();
     }

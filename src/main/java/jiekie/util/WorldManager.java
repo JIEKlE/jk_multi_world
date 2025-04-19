@@ -1,6 +1,7 @@
 package jiekie.util;
 
 import jiekie.MultiWorldPlugin;
+import jiekie.api.NicknameAPI;
 import jiekie.exception.*;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
@@ -212,7 +213,7 @@ public class WorldManager {
         if(world == null)
             throw new TeleportToWorldException(ChatUtil.WORLD_NOT_FOUND);
 
-        Player player = Bukkit.getPlayerExact(playerName);
+        Player player = NicknameAPI.getInstance().getPlayerByNameOrNickname(playerName);
         if(player == null)
             throw new TeleportToWorldException(ChatUtil.PLAYER_NOT_FOUND);
 
