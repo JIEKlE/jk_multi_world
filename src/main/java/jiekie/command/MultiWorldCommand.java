@@ -168,7 +168,7 @@ public class MultiWorldCommand implements CommandExecutor {
 
     private void moveToWorld(Player player, String[] args) {
         if(args.length < 2) {
-            player.sendMessage(ChatUtil.wrongCommand() + " (/월드 이동 월드명 [플레이어ID])");
+            player.sendMessage(ChatUtil.wrongCommand() + " (/월드 이동 월드명 [플레이어ID|닉네임])");
             return;
         }
 

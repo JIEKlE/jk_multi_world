@@ -100,7 +100,7 @@ public class ChatUtil {
         player.sendMessage(ChatColor.GRAY + "　　　　　: 월드를 백업합니다.");
         player.sendMessage("　　　⑥ /월드 이동 월드명");
         player.sendMessage(ChatColor.GRAY + "　　　　　: 월드로 이동합니다.");
-        player.sendMessage("　　　⑦ /월드 이동 월드명 플레이어ID");
+        player.sendMessage("　　　⑦ /월드 이동 월드명 플레이어ID|닉네임");
         player.sendMessage(ChatColor.GRAY + "　　　　　: 플레이어를 월드로 이동시킵니다.");
         player.sendMessage("　　　⑧ /월드 도움말");
         player.sendMessage(ChatColor.GRAY + "　　　　　: 사용 가능한 명령어를 확인할 수 있습니다.");
