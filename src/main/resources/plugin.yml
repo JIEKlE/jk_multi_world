@@ -10,3 +10,5 @@ commands:
     description: 월드 설정 명령어
     usage: /월드
     tab-completer: jiekie.completer.MultiWorldTabCompleter
+    permission: jk.multi_world.command
+    permission-message: ''

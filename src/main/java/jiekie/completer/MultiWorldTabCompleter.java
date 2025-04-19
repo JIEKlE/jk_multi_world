@@ -21,6 +21,8 @@ public class MultiWorldTabCompleter implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+        if(!sender.hasPermission("jk.multi_world.command")) return Collections.emptyList();
+
         int length = args.length;
         if(length == 1)
             return Arrays.asList("생성", "제거", "설정", "초기화", "백업", "이동", "도움말");
