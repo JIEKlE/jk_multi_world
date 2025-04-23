@@ -4,6 +4,7 @@ import jiekie.MultiWorldPlugin;
 import jiekie.exception.*;
 import jiekie.util.ChatUtil;
 import jiekie.util.SoundUtil;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -180,7 +181,7 @@ public class MultiWorldCommand implements CommandExecutor {
             }
         } else {
             try {
-                plugin.getWorldManager().moveToWorld(args[2], args[1]);
+                plugin.getWorldManager().moveToWorld(getContents(args, 2), args[1]);
                 ChatUtil.movePlayerToWorld(player);
                 SoundUtil.playNoteBlockBell(player);
 
@@ -188,6 +189,17 @@ public class MultiWorldCommand implements CommandExecutor {
                 ChatUtil.showErrorMessage(player, e.getMessage());
             }
         }
+    }
 
+    private String getContents(String[] args, int startIndex) {
+        StringBuffer sb = new StringBuffer();
+        for(int i = startIndex ; i < args.length ; i++) {
+            if(i != startIndex)
+                sb.append(" ");
+            sb.append(args[i]);
+        }
+
+        String contents = sb.toString();
+        return ChatColor.translateAlternateColorCodes('&', contents);
     }
 }
