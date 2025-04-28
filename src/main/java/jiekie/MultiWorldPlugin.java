@@ -2,7 +2,7 @@ package jiekie;
 
 import jiekie.command.MultiWorldCommand;
 import jiekie.completer.MultiWorldTabCompleter;
-import jiekie.util.WorldManager;
+import jiekie.manager.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MultiWorldPlugin extends JavaPlugin {
