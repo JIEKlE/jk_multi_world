@@ -9,6 +9,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -20,13 +21,12 @@ public class MultiWorldCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if(!(sender instanceof Player)) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        if(!(sender instanceof Player player)) {
             ChatUtil.notPlayer(sender);
             return true;
         }
 
-        Player player = (Player) sender;
         if(!player.isOp()) {
             ChatUtil.notOp(player);
             return true;
@@ -87,18 +87,18 @@ public class MultiWorldCommand implements CommandExecutor {
                 seed = Long.parseLong(args[5]);
 
             } catch(NumberFormatException e) {
-                ChatUtil.showErrorMessage(player, ChatUtil.INVALID_SEED);
+                ChatUtil.showMessage(player, ChatUtil.INVALID_SEED);
                 return;
             }
         }
 
         try {
             plugin.getWorldManager().createWorld(args[1], args[2], args[3], generateStructures, seed);
-            ChatUtil.createWorld(player);
+            ChatUtil.showMessage(player, ChatUtil.CREATE_WORLD);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldCreationException e) {
-            ChatUtil.showErrorMessage(player, e.getMessage());
+            ChatUtil.showMessage(player, e.getMessage());
         }
     }
 
@@ -110,11 +110,11 @@ public class MultiWorldCommand implements CommandExecutor {
 
         try {
             plugin.getWorldManager().deleteWorld(args[1]);
-            ChatUtil.removeWorld(player);
+            ChatUtil.showMessage(player, ChatUtil.REMOVE_WORLD);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldDeletionException e) {
-            ChatUtil.showErrorMessage(player, e.getMessage());
+            ChatUtil.showMessage(player, e.getMessage());
         }
     }
 
@@ -127,11 +127,11 @@ public class MultiWorldCommand implements CommandExecutor {
         boolean value = Boolean.parseBoolean(args[3]);
         try {
             plugin.getWorldManager().setWorldRule(args[1], args[2], value);
-            ChatUtil.setWorldRule(player);
+            ChatUtil.showMessage(player, ChatUtil.SET_WORLD_RULE);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldRuleChangeException e) {
-            ChatUtil.showErrorMessage(player, e.getMessage());
+            ChatUtil.showMessage(player, e.getMessage());
         }
     }
 
@@ -143,11 +143,11 @@ public class MultiWorldCommand implements CommandExecutor {
 
         try {
             plugin.getWorldManager().resetWorld(args[1]);
-            ChatUtil.resetWorld(player);
+            ChatUtil.showMessage(player, ChatUtil.RESET_WORLD);
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldResetException e) {
-            ChatUtil.showErrorMessage(player, e.getMessage());
+            ChatUtil.showMessage(player, e.getMessage());
         }
     }
 
@@ -163,7 +163,7 @@ public class MultiWorldCommand implements CommandExecutor {
             SoundUtil.playNoteBlockBell(player);
 
         } catch (WorldBackupException e) {
-            ChatUtil.showErrorMessage(player, e.getMessage());
+            ChatUtil.showMessage(player, e.getMessage());
         }
     }
 
@@ -177,22 +177,22 @@ public class MultiWorldCommand implements CommandExecutor {
             try {
                 plugin.getWorldManager().moveToWorld(player.getName(), args[1]);
             } catch (TeleportToWorldException e) {
-                ChatUtil.showErrorMessage(player, e.getMessage());
+                ChatUtil.showMessage(player, e.getMessage());
             }
         } else {
             try {
                 plugin.getWorldManager().moveToWorld(getContents(args, 2), args[1]);
-                ChatUtil.movePlayerToWorld(player);
+                ChatUtil.showMessage(player, ChatUtil.MOVE_PLAYER_TO_WORLD);
                 SoundUtil.playNoteBlockBell(player);
 
             } catch (TeleportToWorldException e) {
-                ChatUtil.showErrorMessage(player, e.getMessage());
+                ChatUtil.showMessage(player, e.getMessage());
             }
         }
     }
 
     private String getContents(String[] args, int startIndex) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for(int i = startIndex ; i < args.length ; i++) {
             if(i != startIndex)
                 sb.append(" ");

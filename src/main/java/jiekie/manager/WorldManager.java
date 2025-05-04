@@ -111,22 +111,16 @@ public class WorldManager {
 
         WorldData worldData = getWorldDataByWorldName(worldName);
 
-        if(rule.equals("PVP"))
-            setPvp(world, worldData, value);
-        else if(rule.equals("시간흐름"))
-            setDayLightCycle(world, worldData, value);
-        else if(rule.equals("날씨변화"))
-            setWeatherCycle(world, worldData, value);
-        else if(rule.equals("팬텀스폰"))
-            setSpawnPhantom(world, worldData, value);
-        else if(rule.equals("인벤세이브"))
-            setKeepInventory(world, worldData, value);
-        else if(rule.equals("불번짐"))
-            setFireTick(world, worldData, value);
-        else if(rule.equals("크리퍼폭발"))
-            setMobGriefing(world, worldData, value);
-        else
-            throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
+        switch (rule) {
+            case "PVP" -> setPvp(world, worldData, value);
+            case "시간흐름" -> setDayLightCycle(world, worldData, value);
+            case "날씨변화" -> setWeatherCycle(world, worldData, value);
+            case "팬텀스폰" -> setSpawnPhantom(world, worldData, value);
+            case "인벤세이브" -> setKeepInventory(world, worldData, value);
+            case "불번짐" -> setFireTick(world, worldData, value);
+            case "크리퍼폭발" -> setMobGriefing(world, worldData, value);
+            default -> throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
+        }
     }
 
     public void resetWorld(String worldName) throws WorldResetException {
@@ -234,8 +228,7 @@ public class WorldManager {
         if(!worldName.matches("[a-zA-Z0-9_\\-]+"))
             throw new WorldCreationException(ChatUtil.INVALID_WORLD_NAME);
 
-        WorldData worldData = new WorldData(worldName, environmentName, typeName, generateStructures, seed);
-        return worldData;
+        return new WorldData(worldName, environmentName, typeName, generateStructures, seed);
     }
 
     private World createWorldByWorldData(WorldData worldData) throws WorldCreationException {
@@ -357,35 +350,6 @@ public class WorldManager {
 
         if(worldData != null)
             worldData.setMobGriefing(value);
-    }
-
-    private void killAllAnimals(World world) {
-        for (Entity entity : world.getEntities()) {
-            if (entity instanceof Animals)
-                entity.remove();
-        }
-    }
-
-    private void killAllMonsters(World world) {
-        for(Entity entity : world.getEntities()) {
-            if(entity instanceof Monster
-                    || entity instanceof Slime
-                    || entity instanceof Shulker
-                    || entity instanceof MagmaCube
-                    || entity instanceof EnderDragon
-                    || entity instanceof Wither
-                    || entity instanceof Wither)
-                entity.remove();
-        }
-    }
-
-    private void killAllVillagers(World world) {
-        for (Entity entity : world.getEntities()) {
-            if (entity instanceof Villager
-                    || entity instanceof WanderingTrader
-                    || entity instanceof TraderLlama)
-                entity.remove();
-        }
     }
 
     private WorldData getWorldDataByWorldName(String worldName) {

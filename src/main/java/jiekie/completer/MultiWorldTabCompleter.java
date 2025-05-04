@@ -2,11 +2,10 @@ package jiekie.completer;
 
 import jiekie.MultiWorldPlugin;
 import jiekie.api.NicknameAPI;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,7 +19,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if(!sender.hasPermission("jk.multi_world.command")) return Collections.emptyList();
 
         int length = args.length;
@@ -43,7 +42,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
             return Arrays.asList("true", "false");
 
         if(length == 6 && commandType.equals("생성"))
-            return Arrays.asList("시드");
+            return List.of("시드");
 
         // 항목
         if(length == 3 && commandType.equals("설정"))

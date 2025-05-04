@@ -2,13 +2,13 @@ package jiekie.model;
 
 public class WorldData {
     /* 필수 정보 */
-    private String worldName;
-    private String environment;
-    private String type;
-    private boolean generateStructures;
+    private final String worldName;
+    private final String environment;
+    private final String type;
+    private final boolean generateStructures;
     
     /* 선택 정보 */
-    private Long seed;
+    private final Long seed;
     
     /* 게임 규칙 */
     private boolean pvp;
