@@ -1,5 +1,6 @@
 package jiekie;
 
+import jiekie.api.MultiWorldAPI;
 import jiekie.command.MultiWorldCommand;
 import jiekie.completer.MultiWorldTabCompleter;
 import jiekie.manager.WorldManager;
@@ -23,6 +24,9 @@ public final class MultiWorldPlugin extends JavaPlugin {
 
         // tab completer
         getCommand("월드").setTabCompleter(new MultiWorldTabCompleter(this));
+
+        // api
+        MultiWorldAPI.initialize(worldManager);
 
         getLogger().info("월드 설정 플러그인 by Jiekie");
         getLogger().info("Copyright © 2025 Jiekie. All rights reserved.");
