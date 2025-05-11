@@ -8,6 +8,7 @@ jiekie\util\SoundUtil.class
 jiekie\manager\WorldManager.class
 jiekie\completer\MultiWorldTabCompleter.class
 jiekie\exception\WorldBackupException.class
+jiekie\api\MultiWorldAPI.class
 jiekie\command\MultiWorldCommand.class
 jiekie\MultiWorldPlugin.class
 jiekie\exception\WorldDeletionException.class

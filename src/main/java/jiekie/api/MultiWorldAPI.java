@@ -16,7 +16,7 @@ public class MultiWorldAPI {
             instance = new MultiWorldAPI(worldManager);
     }
 
-    private static MultiWorldAPI getInstance() {
+    public static MultiWorldAPI getInstance() {
         return instance;
     }
 
