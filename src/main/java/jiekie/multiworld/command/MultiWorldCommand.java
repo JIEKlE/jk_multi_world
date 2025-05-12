@@ -1,9 +1,9 @@
-package jiekie.command;
+package jiekie.multiworld.command;
 
-import jiekie.MultiWorldPlugin;
-import jiekie.exception.*;
-import jiekie.util.ChatUtil;
-import jiekie.util.SoundUtil;
+import jiekie.multiworld.MultiWorldPlugin;
+import jiekie.multiworld.exception.*;
+import jiekie.multiworld.util.ChatUtil;
+import jiekie.multiworld.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

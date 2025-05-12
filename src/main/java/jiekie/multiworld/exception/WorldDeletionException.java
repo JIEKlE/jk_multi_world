@@ -1,4 +1,4 @@
-package jiekie.exception;
+package jiekie.multiworld.exception;
 
 public class WorldDeletionException extends Exception {
     public WorldDeletionException(String message) {

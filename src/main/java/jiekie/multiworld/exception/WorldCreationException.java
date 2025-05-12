@@ -1,4 +1,4 @@
-package jiekie.exception;
+package jiekie.multiworld.exception;
 
 public class WorldCreationException extends Exception {
     public WorldCreationException(String message) {

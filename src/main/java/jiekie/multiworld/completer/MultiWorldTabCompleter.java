@@ -1,7 +1,7 @@
-package jiekie.completer;
+package jiekie.multiworld.completer;
 
-import jiekie.MultiWorldPlugin;
-import jiekie.api.NicknameAPI;
+import jiekie.multiworld.MultiWorldPlugin;
+import jiekie.nickname.api.NicknameAPI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;

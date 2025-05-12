@@ -1,4 +1,4 @@
-package jiekie.model;
+package jiekie.multiworld.model;
 
 public class WorldData {
     /* 필수 정보 */

@@ -1,7 +1,7 @@
-package jiekie.api;
+package jiekie.multiworld.api;
 
-import jiekie.exception.WorldResetException;
-import jiekie.manager.WorldManager;
+import jiekie.multiworld.exception.WorldResetException;
+import jiekie.multiworld.manager.WorldManager;
 
 public class MultiWorldAPI {
     private static MultiWorldAPI instance;

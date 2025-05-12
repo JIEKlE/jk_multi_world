@@ -1,11 +1,11 @@
-package jiekie.manager;
+package jiekie.multiworld.manager;
 
-import jiekie.MultiWorldPlugin;
-import jiekie.api.NicknameAPI;
-import jiekie.exception.*;
-import jiekie.model.WorldData;
-import jiekie.util.ChatUtil;
-import jiekie.util.SoundUtil;
+import jiekie.multiworld.MultiWorldPlugin;
+import jiekie.multiworld.exception.*;
+import jiekie.multiworld.model.WorldData;
+import jiekie.multiworld.util.ChatUtil;
+import jiekie.multiworld.util.SoundUtil;
+import jiekie.nickname.api.NicknameAPI;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

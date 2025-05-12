@@ -1,9 +1,9 @@
-package jiekie;
+package jiekie.multiworld;
 
-import jiekie.api.MultiWorldAPI;
-import jiekie.command.MultiWorldCommand;
-import jiekie.completer.MultiWorldTabCompleter;
-import jiekie.manager.WorldManager;
+import jiekie.multiworld.api.MultiWorldAPI;
+import jiekie.multiworld.command.MultiWorldCommand;
+import jiekie.multiworld.completer.MultiWorldTabCompleter;
+import jiekie.multiworld.manager.WorldManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class MultiWorldPlugin extends JavaPlugin {
