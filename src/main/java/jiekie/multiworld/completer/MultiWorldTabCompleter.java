@@ -29,11 +29,11 @@ public class MultiWorldTabCompleter implements TabCompleter {
         // 생성 제외
         String commandType = args[0];
         if(length == 2) {
-            if(!(commandType.equals("생성") || commandType.equals("도움말")))
-                return plugin.getWorldManager().getWorldNames();
-
             if(commandType.equals("생성"))
                 return List.of("월드명");
+
+            if(!(commandType.equals("생성") || commandType.equals("도움말")))
+                return plugin.getWorldManager().getWorldNames();
         }
             
 
