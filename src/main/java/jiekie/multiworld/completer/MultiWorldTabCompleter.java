@@ -28,8 +28,14 @@ public class MultiWorldTabCompleter implements TabCompleter {
 
         // 생성 제외
         String commandType = args[0];
-        if(length == 2 && !(commandType.equals("생성") || commandType.equals("도움말")))
-            return plugin.getWorldManager().getWorldNames();
+        if(length == 2) {
+            if(!(commandType.equals("생성") || commandType.equals("도움말")))
+                return plugin.getWorldManager().getWorldNames();
+
+            if(commandType.equals("생성"))
+                return List.of("월드명");
+        }
+            
 
         // 생성
         if(length == 3 && commandType.equals("생성"))
@@ -46,7 +52,7 @@ public class MultiWorldTabCompleter implements TabCompleter {
 
         // 항목
         if(length == 3 && commandType.equals("설정"))
-            return Arrays.asList("PVP", "시간흐름", "날씨변화", "팬텀스폰", "인벤세이브", "불번짐", "크리퍼폭발");
+            return Arrays.asList("PVP", "시간흐름", "날씨변화", "팬텀스폰", "인벤세이브", "불번짐", "크리퍼폭발", "몬스터스폰");
 
         if(length == 4 && commandType.equals("설정"))
             return Arrays.asList("true", "false");

@@ -55,6 +55,7 @@ public class WorldManager {
                 worldData.setKeepInventory(config.getBoolean(path + ".keepInventory"));
                 worldData.setFireTick(config.getBoolean(path + ".fireTick"));
                 worldData.setMobGriefing(config.getBoolean(path + ".mobGriefing"));
+                worldData.setMobSpawning(config.getBoolean(path + ".mobSpawning"));
 
                 worldDataMap.put(worldName, worldData);
                 createWorldByWorldData(worldData);
@@ -119,6 +120,7 @@ public class WorldManager {
             case "인벤세이브" -> setKeepInventory(world, worldData, value);
             case "불번짐" -> setFireTick(world, worldData, value);
             case "크리퍼폭발" -> setMobGriefing(world, worldData, value);
+            case "몬스터스폰" -> setMobSpawning(world, worldData, value);
             default -> throw new WorldRuleChangeException(ChatUtil.INVALID_RULE);
         }
     }
@@ -258,6 +260,7 @@ public class WorldManager {
         setKeepInventory(world, worldData, worldData.isKeepInventory());
         setFireTick(world, worldData, worldData.isFireTick());
         setMobGriefing(world, worldData, worldData.isMobGriefing());
+        setMobSpawning(world, worldData, worldData.isMobSpawning());
 
         return world;
     }
@@ -346,10 +349,17 @@ public class WorldManager {
     }
 
     private void setMobGriefing(World world, WorldData worldData, boolean value) {
-        world.setGameRule(GameRule.DO_PATROL_SPAWNING, value);
+        world.setGameRule(GameRule.MOB_GRIEFING, value);
 
         if(worldData != null)
             worldData.setMobGriefing(value);
+    }
+
+    private void setMobSpawning(World world, WorldData worldData, boolean value) {
+        world.setGameRule(GameRule.DO_MOB_SPAWNING, value);
+
+        if(worldData != null)
+            worldData.setMobSpawning(value);
     }
 
     private WorldData getWorldDataByWorldName(String worldName) {
@@ -419,6 +429,7 @@ public class WorldManager {
             config.set(path + ".keepInventory", worldData.isKeepInventory());
             config.set(path + ".fireTick", worldData.isFireTick());
             config.set(path + ".mobGriefing", worldData.isMobGriefing());
+            config.set(path + ".mobSpawning", worldData.isMobSpawning());
 
             World world = Bukkit.getWorld(worldName);
             world.save();

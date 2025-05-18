@@ -18,6 +18,7 @@ public class WorldData {
     private boolean keepInventory;
     private boolean fireTick;
     private boolean mobGriefing;
+    private boolean mobSpawning;
 
     public WorldData(String worldName, String environment, String type, boolean generateStructures, Long seed) {
         this.worldName = worldName;
@@ -33,6 +34,7 @@ public class WorldData {
         this.keepInventory = false;
         this.fireTick = true;
         this.mobGriefing = true;
+        this.mobSpawning = true;
     }
 
     public String getWorldName() {
@@ -109,5 +111,13 @@ public class WorldData {
 
     public void setMobGriefing(boolean mobGriefing) {
         this.mobGriefing = mobGriefing;
+    }
+
+    public boolean isMobSpawning() {
+        return mobSpawning;
+    }
+
+    public void setMobSpawning(boolean mobSpawning) {
+        this.mobSpawning = mobSpawning;
     }
 }
