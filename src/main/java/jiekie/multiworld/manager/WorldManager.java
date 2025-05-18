@@ -44,18 +44,18 @@ public class WorldManager {
                         worldName
                         , config.getString(path + ".environment")
                         , config.getString(path + ".type")
-                        , config.getBoolean(path + ".generateStructures")
+                        , config.getBoolean(path + ".generate_structures")
                         , config.contains(path + ".seed") ? config.getLong(path + ".seed") : null
                 );
 
                 worldData.setPvp(config.getBoolean(path + ".pvp"));
-                worldData.setDayLightCycle(config.getBoolean(path + ".dayLightCycle"));
-                worldData.setWeatherCycle(config.getBoolean(path + ".weatherCycle"));
-                worldData.setSpawnPhantom(config.getBoolean(path + ".spawnPhantom"));
-                worldData.setKeepInventory(config.getBoolean(path + ".keepInventory"));
-                worldData.setFireTick(config.getBoolean(path + ".fireTick"));
-                worldData.setMobGriefing(config.getBoolean(path + ".mobGriefing"));
-                worldData.setMobSpawning(config.getBoolean(path + ".mobSpawning"));
+                worldData.setDayLightCycle(config.getBoolean(path + ".day_light_cycle"));
+                worldData.setWeatherCycle(config.getBoolean(path + ".weather_cycle"));
+                worldData.setSpawnPhantom(config.getBoolean(path + ".spawn_phantom"));
+                worldData.setKeepInventory(config.getBoolean(path + ".keep_inventory"));
+                worldData.setFireTick(config.getBoolean(path + ".fire_tick"));
+                worldData.setMobGriefing(config.getBoolean(path + ".mob_griefing"));
+                worldData.setMobSpawning(config.getBoolean(path + ".mob_spawning"));
 
                 worldDataMap.put(worldName, worldData);
                 createWorldByWorldData(worldData);
@@ -419,17 +419,17 @@ public class WorldManager {
 
             config.set(path + ".environment", worldData.getEnvironment());
             config.set(path + ".type", worldData.getType());
-            config.set(path + ".generateStructures", worldData.isGenerateStructures());
+            config.set(path + ".generate_structures", worldData.isGenerateStructures());
             config.set(path + ".seed", worldData.getSeed());
 
             config.set(path + ".pvp", worldData.isPvp());
-            config.set(path + ".dayLightCycle", worldData.isDayLightCycle());
-            config.set(path + ".weatherCycle", worldData.isWeatherCycle());
-            config.set(path + ".spawnPhantom", worldData.isSpawnPhantom());
-            config.set(path + ".keepInventory", worldData.isKeepInventory());
-            config.set(path + ".fireTick", worldData.isFireTick());
-            config.set(path + ".mobGriefing", worldData.isMobGriefing());
-            config.set(path + ".mobSpawning", worldData.isMobSpawning());
+            config.set(path + ".day_light_cycle", worldData.isDayLightCycle());
+            config.set(path + ".weather_cycle", worldData.isWeatherCycle());
+            config.set(path + ".spawn_phantom", worldData.isSpawnPhantom());
+            config.set(path + ".keep_inventory", worldData.isKeepInventory());
+            config.set(path + ".fire_tick", worldData.isFireTick());
+            config.set(path + ".mob_griefing", worldData.isMobGriefing());
+            config.set(path + ".mob_spawning", worldData.isMobSpawning());
 
             World world = Bukkit.getWorld(worldName);
             world.save();
